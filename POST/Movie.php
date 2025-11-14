@@ -1,30 +1,43 @@
 <?php
     class Movie {
-        private $name;
+        private $nombre;
         private $isan;
-        private $year;
-        private $rating;
+        private $anio;
+        private $puntuacion;
 
-        public function __construct($name, $isan, $year, $rating) {
-            $this->name = $name;
+        public function __construct($nombre, $isan, $anio, $puntuacion) {
+            $this->nombre = $nombre;
             $this->isan = $isan;
-            $this->year = $year;
-            $this->rating = $rating;
+            $this->anio = $anio;
+            $this->puntuacion = $puntuacion;
         }
 
-        public function get_name() {
-            return $this->name;
+        public function get_nombre() {
+            return $this->nombre;
         }
 
         public function get_isan() {
             return $this->isan;
         }
 
-        public function get_year() {
-            return $this->year;
+        public function get_anio() {
+            return $this->anio;
         }
 
-        public function get_rating() {
-            return $this->rating;   
+        public function get_puntuacion() {
+            return $this->puntuacion;   
         }
-    }
+
+        public function set_nombre($nombre) {
+            $this->nombre = $nombre;
+        }
+        public function set_isan($isan) {
+            $this->isan = $isan;
+        }
+        public function set_anio($anio) {
+            $this->anio = $anio;
+        }
+        public function set_puntuacion($puntuacion) {
+            $this->puntuacion = $puntuacion;
+        }
+    }  

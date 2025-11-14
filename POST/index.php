@@ -10,35 +10,77 @@
         require_once 'Movie.php';
         require_once 'Top.php';
 
-
+        $string = "";
         $top = new Top();
 
-        $inception = new Movie("Inception", "0000-0001-2345-6789-A", 2010, 5);
-        $matrix = new Movie("The Matrix", "0000-0002-3456-7890-B", 1999, 5);
-        $interstellar = new Movie("Interstellar", "0000-0003-4567-8901-C", 2014, 4);
+        $inception = new Movie("Inception", "12345678", 2010, 5);
+        $matrix = new Movie("The Matrix", "23456789", 1999, 5);
+        $interstellar = new Movie("Interstellar", "34567890", 2014, 4);
+        $superman = new Movie("Superman", "45678901", 1978, 4);
+        $BatmanVsSuperman = new Movie("Batman vs Superman", "56789012", 2016, 3);
+
+        $top->add_movie($inception);
+        $top->add_movie($matrix);
+        $top->add_movie($interstellar);
+        $top->add_movie($superman);
+        $top->add_movie($BatmanVsSuperman);
+
+        $movies = $top->get_movies();
+    ?>
+
+    <?php 
 
         if (isset($_POST['aux']) && !empty($_POST['aux'])){
             $var = isset($_POST['aux']) ? $_POST['aux'] : "";
             $top = $top->stringToArray($var);
         }  
 
-        $top->add_movie($inception);
-        $top->add_movie($matrix);
-        $top->add_movie($interstellar);
 
-        $movies = $top->get_movies();
-    ?>
-
-    <?php 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (isset($_POST['enviar'])) {
             $nombre = $_POST['nombre'];
-            $ISAN = $_POST['ISAN'];
+            $isan = $_POST['isan'];
             $anio = $_POST['anio'];
             $puntuacion = $_POST['puntuacion'];
+            $is_valid = true;
 
-            $nueva_pelicula = new Movie($nombre, $ISAN, $anio, $puntuacion);
 
-            $top->add_movie($nueva_pelicula);
+            if (empty($nombre) && empty($isan)) {
+                echo "<p style='color:red;'>El nombre y el isan son obligatorios.</p>";
+                $is_valid = false;
+            } else if (empty($isan) && !empty($nombre)) {
+                $html = "<ul>";
+                $moviesName = $top->getByName($nombre);
+
+                foreach ($moviesName as $movie) {
+                    $html .= "<li>
+                {$movie->get_nombre()} - ISAN: {$movie->get_isan()} - Año: {$movie->get_anio()} - Puntuación: {$movie->get_puntuacion()}
+                    </li>";
+                }
+                $html .= "</ul>";
+                $is_valid = false;
+                echo $html;
+            } else if (strlen($isan) != 8) {
+                echo "<p style='color:red;'>El campo ISAN debe tener exactamente 8 caracteres.</p>";
+                $is_valid = false;
+            } else if ($top->comprobarIsan($isan) && !empty($nombre) && !empty($anio) && !empty($puntuacion)) {
+                $top->updateMovie($nombre, $isan, $anio, $puntuacion);
+                echo "<p style='color:green;'>Película actualizada correctamente.</p>";
+                $is_valid = false;
+            }
+
+            if ($top->comprobarIsan($isan) && empty($nombre) && empty($anio) && empty($puntuacion)) {
+                $top->deleteMovie($isan);
+                echo "<p style='color:green;'>Película eliminada correctamente.</p>";
+                $is_valid = false;
+            }
+            
+            if ($is_valid) {
+                $new_movie = new Movie($nombre, $isan, $anio, $puntuacion);
+                $top->add_movie($new_movie);
+                $movies = $top->get_movies();
+                $string = $top->arrayToString($movies);
+            }
+
             $movies = $top->get_movies();
         }
     ?>
@@ -47,13 +89,13 @@
 
     <form action="index.php" method="POST">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" name="nombre" required>
+        <input type="text" id="nombre" name="nombre">
         <br>
-        <label for="ISAN">ISAN:</label>
-        <input type="text" id="ISAN" name="ISAN" required>
+        <label for="isan">ISAN:</label>
+        <input type="text" id="isan" name="isan">
         <br>
         <label for="anio">Año:</label>
-        <input type="text" id="anio" name="anio" required>
+        <input type="text" id="anio" name="anio" >
         <br>
         <label for="puntuacion">Puntuacion:</label>
         <select id="puntuacion" name="puntuacion" class="form-select">
@@ -65,7 +107,7 @@
             <option value="5">5</option>
         </select>
         <br>
-        <input type="submit" value="Enviar">
+        <button type="submit" name="enviar">Enviar</button>
         <input type="hidden" name="aux" value="<?php echo $string?>">
     </form>
 
@@ -73,16 +115,16 @@
     <ul>
         <?php foreach ($movies as $movie): ?>
             <li>
-                <strong>Nombre:</strong> <?php echo htmlspecialchars($movie->get_name()); ?>
+                <strong>Nombre:</strong> <?php echo htmlspecialchars($movie->get_nombre()); ?>
             </li>
             <li>
                 <strong>ISAN:</strong> <?php echo htmlspecialchars($movie->get_isan()); ?>
             </li>
             <li>
-                <strong>Año:</strong> <?php echo htmlspecialchars($movie->get_year()); ?>
+                <strong>Año:</strong> <?php echo htmlspecialchars($movie->get_anio()); ?>
             </li>
             <li>
-                <strong>Puntuación:</strong> <?php echo htmlspecialchars($movie->get_rating()); ?>
+                <strong>Puntuación:</strong> <?php echo htmlspecialchars($movie->get_puntuacion()); ?>
             </li>
             <hr>
         <?php endforeach; ?>
