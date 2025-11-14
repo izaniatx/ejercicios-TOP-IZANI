@@ -7,13 +7,15 @@
 </head>
 <body>
     <?php
+        session_start();
+
         require_once 'Movie.php';
         require_once 'Top.php';
 
         $top = new Top();
 
-        if (isset($_COOKIE['aux']) && !empty($_COOKIE['aux'])) {
-            $top = $top->stringToArray($_COOKIE['aux']);
+        if (isset($_SESSION['aux'])) {
+            $top = $top->stringToArray($_SESSION['aux']);
         } else {
             $top->add_movie(new Movie("Inception", "12345678", 2010, 5));
             $top->add_movie(new Movie("The Matrix", "23456789", 1999, 5));
@@ -33,12 +35,11 @@
             $is_valid = true;
 
             if (empty($nombre) && empty($isan)) {
-                echo "<p style='color:red;'>El nombre y el ISAN son obligatorios.</p>";
+                echo "<p style='color:red;'>Nombre e ISAN obligatorios.</p>";
                 $is_valid = false;
             }
             else if (empty($isan) && !empty($nombre)) {
                 $moviesName = $top->getByName($nombre);
-
                 echo "<ul>";
                 foreach ($moviesName as $movie) {
                     echo "<li>{$movie->get_nombre()} - ISAN: {$movie->get_isan()} - Año: {$movie->get_anio()} - Puntuación: {$movie->get_puntuacion()}</li>";
@@ -66,13 +67,13 @@
                 $top->add_movie(new Movie($nombre, $isan, $anio, $puntuacion));
             }
 
-            $string = $top->arrayToString($top->get_movies());
-            setcookie('aux', $string, time() + 3600);
+            $_SESSION['aux'] = $top->arrayToString($top->get_movies());
 
             header("Location: index.php");
             exit();
         }
     ?>
+
 
 
     <h4>Inntroduce una película</h4>
